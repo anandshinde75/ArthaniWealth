@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/ArthaniWealth/static/css/main.eb4033a2.css",
+    "main.js": "/ArthaniWealth/static/js/main.a3019e86.js",
+    "static/js/453.8cc1c9b2.chunk.js": "/ArthaniWealth/static/js/453.8cc1c9b2.chunk.js",
+    "index.html": "/ArthaniWealth/index.html",
+    "main.eb4033a2.css.map": "/ArthaniWealth/static/css/main.eb4033a2.css.map",
+    "main.a3019e86.js.map": "/ArthaniWealth/static/js/main.a3019e86.js.map",
+    "453.8cc1c9b2.chunk.js.map": "/ArthaniWealth/static/js/453.8cc1c9b2.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.eb4033a2.css",
+    "static/js/main.a3019e86.js"
+  ]
+}
