@@ -2,6 +2,7 @@
   "name": "arthaniwealth",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://anandshinde75.github.io/ArthaniWealth",
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -46,6 +47,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.14",
     "autoprefixer": "^10.4.21",
+    "gh-pages": "^6.3.0",
     "postcss": "^8.5.6"
   }
 }
