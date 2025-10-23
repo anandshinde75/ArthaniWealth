@@ -79,7 +79,7 @@ export default function ArthaniWealth() {
     }
   };
 
-  const sendMessage = () => {
+  /* const sendMessage = () => {
     if (!chatInput.trim()) return;
     
     const userMsg = { type: 'user', text: chatInput, time: new Date().toLocaleTimeString() };
@@ -108,7 +108,88 @@ export default function ArthaniWealth() {
     const botMsg = { type: 'bot', text: botResponse, time: new Date().toLocaleTimeString() };
     setChatMessages([...newMessages, botMsg]);
     setChatInput('');
-  };
+  };*/
+  
+  const sendMessage = async () => {
+  console.log("Inside sendMessage");
+    if (!chatInput.trim()) return;
+    
+    const userMsg = { type: 'user', text: chatInput, time: new Date().toLocaleTimeString() };
+    const newMessages = [...chatMessages, userMsg];
+    setChatMessages(newMessages);
+    
+    // Show loading state
+    const loadingMsg = { type: 'bot', text: '...', time: '' };
+    setChatMessages([...newMessages, loadingMsg]);
+    
+    try {
+      
+      // ADD CONSOLE.LOG HERE - BEFORE THE FETCH
+            console.log('Sending:', {
+              message: chatInput,
+              userId: 'user_' + Date.now(),
+              context: {
+                riskProfile: storage.get('riskProfile'),
+                goals: storage.get('goals', []),
+                assets: storage.get('assets', [])
+              }
+      });
+      
+      
+      // Replace with YOUR n8n webhook URL
+      const response = await fetch('https://anand-n8n-1234.app.n8n.cloud/webhook/arthaniwealth-chat', {
+      //const response = await fetch('https://anand-n8n-1234.app.n8n.cloud/webhook/b938f860-e419-4630-9ae4-e4af1ab99ba6/chat', {
+
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: chatInput,
+          userId: 'user_' + Date.now(), // For conversation memory
+          context: {
+            riskProfile: storage.get('riskProfile'),
+            goals: storage.get('goals', []),
+            assets: storage.get('assets', [])
+          }
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      
+      const data = await response.json();
+      
+      // ADD CONSOLE.LOG HERE - AFTER GETTING THE RESPONSE
+      console.log('Received:', data);
+      
+      
+      // Extract response from n8n - adjust based on your workflow's response format
+      // const botResponse = data.output || data.response || data.message || data.text || "I couldn't process that. Please try again.";
+      const botResponse = data.reply || data.output || data.response || data.message || data.text || "I couldn't process that. Please try again.";
+      
+      const botMsg = { 
+        type: 'bot', 
+        text: botResponse, 
+        time: new Date().toLocaleTimeString() 
+      };
+      
+      // Replace loading message with actual response
+      setChatMessages([...newMessages, botMsg]);
+      
+    } catch (error) {
+      console.error('Error calling n8n:', error);
+      const errorMsg = { 
+        type: 'bot', 
+        text: "Sorry, I'm having trouble connecting. Please check your internet connection and try again.", 
+        time: new Date().toLocaleTimeString() 
+      };
+      setChatMessages([...newMessages, errorMsg]);
+    }
+    
+    setChatInput('');
+};
 
   const renderPage = () => {
     switch(currentPage) {
