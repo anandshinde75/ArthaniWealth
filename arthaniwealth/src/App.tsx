@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calculator, Target, TrendingUp, PieChart, Wallet, MessageCircle, Menu, X, Home, DollarSign, CheckCircle, Users } from 'lucide-react';
 import './App.css';
+import CalculatorsPage from './CalculatorsPage';
 
 
 // Storage utility functions
@@ -37,6 +38,16 @@ const storage = {
       }
     }
   }
+};
+
+// Generate persistent session ID
+const getSessionId = () => {
+  let sessionId = localStorage.getItem('chatSessionId');
+  if (!sessionId) {
+    sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('chatSessionId', sessionId);
+  }
+  return sessionId;
 };
 
 // Main App Component
@@ -79,39 +90,8 @@ export default function ArthaniWealth() {
     }
   };
 
-  /* const sendMessage = () => {
-    if (!chatInput.trim()) return;
-    
-    const userMsg = { type: 'user', text: chatInput, time: new Date().toLocaleTimeString() };
-    const newMessages = [...chatMessages, userMsg];
-    
-    let botResponse = "I understand you're asking about " + chatInput + ". ";
-    
-    if (chatInput.toLowerCase().includes('risk')) {
-      const risk = storage.get('riskProfile');
-      botResponse = risk 
-        ? `Your current risk profile is ${risk}. This helps me recommend suitable investment options for you.`
-        : "I recommend completing the Risk Profile assessment first. It will help me provide personalized investment advice.";
-    } else if (chatInput.toLowerCase().includes('goal')) {
-      const goals = storage.get('goals', []);
-      botResponse = goals.length > 0
-        ? `You have ${goals.length} active goal(s). Would you like to review or adjust any of them?`
-        : "Start by setting up your financial goals in the Goal Setting section. It's a great first step!";
-    } else if (chatInput.toLowerCase().includes('invest')) {
-      botResponse = "Investment strategy depends on your risk profile, time horizon, and goals. Have you completed your risk assessment yet?";
-    } else if (chatInput.toLowerCase().includes('save')) {
-      botResponse = "Great question! Start by tracking your income and expenses to identify saving opportunities. Then use our calculators to plan your savings journey.";
-    } else {
-      botResponse = "That's a great question! I can help you with calculators, goal setting, risk assessment, and financial planning. What would you like to explore?";
-    }
-    
-    const botMsg = { type: 'bot', text: botResponse, time: new Date().toLocaleTimeString() };
-    setChatMessages([...newMessages, botMsg]);
-    setChatInput('');
-  };*/
-  
   const sendMessage = async () => {
-  console.log("Inside sendMessage");
+  
     if (!chatInput.trim()) return;
     
     const userMsg = { type: 'user', text: chatInput, time: new Date().toLocaleTimeString() };
@@ -123,37 +103,34 @@ export default function ArthaniWealth() {
     setChatMessages([...newMessages, loadingMsg]);
     
     try {
-      
-      // ADD CONSOLE.LOG HERE - BEFORE THE FETCH
-            console.log('Sending:', {
-              message: chatInput,
-              userId: 'user_' + Date.now(),
-              context: {
-                riskProfile: storage.get('riskProfile'),
-                goals: storage.get('goals', []),
-                assets: storage.get('assets', [])
-              }
-      });
-      
-      
+      	
+      	// Get persistent session ID
+    	const sessionId = getSessionId();
+    	
+    	 // Build conversation history (last 10 messages)
+	    const conversationHistory = chatMessages.slice(-10).map(msg => ({
+	      role: msg.type === 'user' ? 'user' : 'assistant',
+	      content: msg.text
+    }));
+          
       // Replace with YOUR n8n webhook URL
       const response = await fetch('https://anand-n8n-1234.app.n8n.cloud/webhook/arthaniwealth-chat', {
-      //const response = await fetch('https://anand-n8n-1234.app.n8n.cloud/webhook/b938f860-e419-4630-9ae4-e4af1ab99ba6/chat', {
-
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: chatInput,
-          userId: 'user_' + Date.now(), // For conversation memory
-          context: {
-            riskProfile: storage.get('riskProfile'),
-            goals: storage.get('goals', []),
-            assets: storage.get('assets', [])
-          }
-        })
-      });
+	        message: chatInput,
+	        sessionId: sessionId,  // Now persistent per browser
+	        userId: sessionId,     // Now persistent per browser
+	        history: conversationHistory,  // NEW: Include history
+	        context: {
+	          riskProfile: storage.get('riskProfile'),
+	          goals: storage.get('goals', []),
+	          assets: storage.get('assets', [])
+	        }
+	      })
+    	});
       
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -161,12 +138,10 @@ export default function ArthaniWealth() {
       
       const data = await response.json();
       
-      // ADD CONSOLE.LOG HERE - AFTER GETTING THE RESPONSE
-      console.log('Received:', data);
+
       
       
       // Extract response from n8n - adjust based on your workflow's response format
-      // const botResponse = data.output || data.response || data.message || data.text || "I couldn't process that. Please try again.";
       const botResponse = data.reply || data.output || data.response || data.message || data.text || "I couldn't process that. Please try again.";
       
       const botMsg = { 
@@ -418,82 +393,6 @@ function HomePage({ setCurrentPage }: { setCurrentPage: (page: string) => void }
           </div>
         </div>
       </section>
-    </div>
-  );
-}
-
-function CalculatorsPage() {
-  const [activeCalc, setActiveCalc] = useState('loan');
-  const [loanData, setLoanData] = useState({ amount: 100000, rate: 10, tenure: 5 });
-
-  const calculateLoan = () => {
-    const P = loanData.amount;
-    const r = loanData.rate / 12 / 100;
-    const n = loanData.tenure * 12;
-    const EMI = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-    const total = EMI * n;
-    const interest = total - P;
-    return { EMI: EMI.toFixed(2), total: total.toFixed(2), interest: interest.toFixed(2) };
-  };
-
-  const loanResult = calculateLoan();
-
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold text-center mb-12 text-gray-800">Financial Calculators</h1>
-      
-      <div className="bg-white rounded-2xl p-8 shadow-lg">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Loan EMI Calculator</h2>
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-700">Loan Amount (₹)</label>
-              <input
-                type="number"
-                value={loanData.amount}
-                onChange={(e) => setLoanData({...loanData, amount: Number(e.target.value)})}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-emerald-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-700">Interest Rate (% p.a.)</label>
-              <input
-                type="number"
-                step="0.1"
-                value={loanData.rate}
-                onChange={(e) => setLoanData({...loanData, rate: Number(e.target.value)})}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-emerald-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-700">Tenure (Years)</label>
-              <input
-                type="number"
-                value={loanData.tenure}
-                onChange={(e) => setLoanData({...loanData, tenure: Number(e.target.value)})}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-emerald-500"
-              />
-            </div>
-          </div>
-          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-4 text-gray-800">Results</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Monthly EMI:</span>
-                <span className="font-bold text-emerald-600">₹{loanResult.EMI}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Total Payment:</span>
-                <span className="font-bold text-gray-800">₹{loanResult.total}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Total Interest:</span>
-                <span className="font-bold text-teal-600">₹{loanResult.interest}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
