@@ -125,7 +125,7 @@ export default function CalculatorsPage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700">Loan Amount (?)</label>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Loan Amount (Rs. )</label>
                 <input
                   type="number"
                   value={loanData.amount}
@@ -181,7 +181,7 @@ export default function CalculatorsPage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700">Monthly Investment (?)</label>
+                <label className="block text-sm font-medium mb-2 text-gray-700">Monthly Investment (Rs. )</label>
                 <input
                   type="number"
                   value={sipData.monthlyInvestment}
