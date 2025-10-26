@@ -6,10 +6,10 @@ export default function AboutPage() {
       <h1 className="text-4xl font-bold text-center mb-12 text-gray-800">About ArthaniWealth</h1>
       <div className="bg-white rounded-2xl p-8 shadow-lg">
         <p className="text-gray-700 mb-4">
-          ArthaniWealth is your trusted partner in financial planning and wealth management.
+          ArthaniWealth, details coming soon.
         </p>
         <p className="text-gray-700">
-          We provide intelligent tools and insights to help you achieve your financial goals.
+          Provides intelligent tools and insights to help you achieve your financial goals.
         </p>
       </div>
     </div>
