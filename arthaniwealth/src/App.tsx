@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calculator, Target, TrendingUp, PieChart, Wallet, MessageCircle, Menu, X, Home, DollarSign, CheckCircle, Users } from 'lucide-react';
+import ReactMarkdown from 'react-markdown'; 
 import './css/App.css';
 import { storage, getSessionId } from './utils/storage';  // ADD THIS
 
@@ -37,7 +38,7 @@ export default function ArthaniWealth() {
       const risk = storage.get('riskProfile');
       const goals = storage.get('goals', []);
       
-      let greeting = "👋 Hi there! I'm your ArthaniWealth assistant. How can I help you today?";
+      let greeting = "👋 Hello! I’m your ArthaniWealth assistant. The information and insights provided here are for educational and informational purposes only. They do not constitute financial advice. Please consult a certified financial advisor before making any investment or financial decisions.";
       
       if (risk || goals.length > 0) {
         greeting = "👋 Welcome back! ";
@@ -61,6 +62,9 @@ export default function ArthaniWealth() {
     const userMsg = { type: 'user', text: chatInput, time: new Date().toLocaleTimeString() };
     const newMessages = [...chatMessages, userMsg];
     setChatMessages(newMessages);
+    
+    // ✅ Clear input immediately
+    setChatInput('');
     
     // Show loading state
     const loadingMsg = { type: 'bot', text: '...', time: '' };
@@ -101,10 +105,7 @@ export default function ArthaniWealth() {
       }
       
       const data = await response.json();
-      
-
-      
-      
+       
       // Extract response from n8n - adjust based on your workflow's response format
       const botResponse = data.reply || data.output || data.response || data.message || data.text || "I couldn't process that. Please try again.";
       
@@ -241,7 +242,21 @@ export default function ArthaniWealth() {
                     ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white'
                     : 'bg-gray-100 text-gray-800'
                 }`}>
-                  <p className="text-sm">{msg.text}</p>
+                
+                {/* THIS IS THE FIX: */}
+		 {msg.type === 'user' ? (
+		    // 1. User messages are rendered as simple text.
+		    <p className="text-sm">{msg.text}</p>
+		  ) : (
+		    // 2. Bot messages are wrapped in a div with the styling class 
+		    //    and the content is passed to ReactMarkdown.
+		    <div className="prose prose-sm">
+		      <ReactMarkdown>
+			{msg.text}
+		      </ReactMarkdown>
+		    </div>
+                  )}
+                
                   <p className={`text-xs mt-1 ${msg.type === 'user' ? 'text-emerald-100' : 'text-gray-500'}`}>
                     {msg.time}
                   </p>
