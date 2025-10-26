@@ -19,6 +19,8 @@ type LumpSumWithdrawal = {
 };
 
 export default function RetirementPage() {
+  const [isLoaded, setIsLoaded] = useState(false);
+  
   // Input states
   const [currentAge, setCurrentAge] = useState(50);
   const [retirementAge, setRetirementAge] = useState(60);
@@ -40,6 +42,7 @@ export default function RetirementPage() {
   // Load saved data
   useEffect(() => {
     const saved = storage.get('retirementCalculator');
+    console.log('Loading retirement data:', saved); // Debug log
     if (saved) {
       setCurrentAge(saved.currentAge || 50);
       setRetirementAge(saved.retirementAge || 60);
@@ -51,7 +54,12 @@ export default function RetirementPage() {
       setCapitalGainTax(saved.capitalGainTax || 12.5);
       setPreRetirementExpenses(saved.preRetirementExpenses || 250000);
       setHouseholdInflation(saved.householdInflation || 7);
+      setLumpSumWithdrawals(saved.lumpSumWithdrawals || []);
+      if (saved.postRetirementExpensesManual) {
+        setPostRetirementExpensesManual(saved.postRetirementExpensesManual);
+      }
     }
+    setIsLoaded(true);
   }, []);
 
   // Calculate auto post-retirement expenses
@@ -68,22 +76,28 @@ export default function RetirementPage() {
   }, [currentAge, retirementAge, lifeExpectancy, currentSavings, monthlySaving, savingsIncrease, 
       preRetirementROI, capitalGainTax, postRetirementExpensesManual, householdInflation, lumpSumWithdrawals]);
 
-  // Save data
+  // Save data (only after initial load)
   useEffect(() => {
-    storage.set('retirementCalculator', {
-      currentAge,
-      retirementAge,
-      lifeExpectancy,
-      currentSavings,
-      monthlySaving,
-      savingsIncrease,
-      preRetirementROI,
-      capitalGainTax,
-      preRetirementExpenses,
-      householdInflation
-    });
-  }, [currentAge, retirementAge, lifeExpectancy, currentSavings, monthlySaving, 
-      savingsIncrease, preRetirementROI, capitalGainTax, preRetirementExpenses, householdInflation]);
+    if (isLoaded) {
+      console.log('Saving retirement data'); // Debug log
+      storage.set('retirementCalculator', {
+        currentAge,
+        retirementAge,
+        lifeExpectancy,
+        currentSavings,
+        monthlySaving,
+        savingsIncrease,
+        preRetirementROI,
+        capitalGainTax,
+        preRetirementExpenses,
+        householdInflation,
+        postRetirementExpensesManual,
+        lumpSumWithdrawals
+      });
+    }
+  }, [isLoaded, currentAge, retirementAge, lifeExpectancy, currentSavings, monthlySaving, 
+      savingsIncrease, preRetirementROI, capitalGainTax, preRetirementExpenses, 
+      householdInflation, postRetirementExpensesManual, lumpSumWithdrawals]);
 
   const calculateSimulation = () => {
     const data: SimulationRow[] = [];
@@ -91,17 +105,20 @@ export default function RetirementPage() {
     let annualSavings = monthlySaving * 12;
     let annualExpenses = postRetirementExpensesManual * 12;
     
-    const postTaxROI = preRetirementROI - (preRetirementROI * capitalGainTax / 100);
+    // Post-tax ROI (tax only applies during withdrawal phase)
+    const postTaxROI = preRetirementROI * (1 - capitalGainTax / 100);
     
     for (let age = currentAge; age <= lifeExpectancy + 5; age++) {
-      const isRetired = age > retirementAge; // Changed from >= to > (withdrawal starts AFTER retirement)
+      const isRetired = age > retirementAge; // Withdrawal starts AFTER retirement
       const isAlive = age <= lifeExpectancy;
       
       // Beginning corpus
       const corpusAtBeginning = corpus;
       
-      // Calculate returns on beginning corpus (FIXED: calculate on beginning corpus, not after adding savings)
-      const returnOnInvestment = corpusAtBeginning * (postTaxROI / 100);
+      // Calculate returns on beginning corpus
+      // Use full ROI during accumulation, post-tax ROI during withdrawal
+      const applicableROI = isRetired ? postTaxROI : preRetirementROI;
+      const returnOnInvestment = corpusAtBeginning * (applicableROI / 100);
       
       // Incremental savings (only before and during retirement year)
       const incrementalSavings = age <= retirementAge ? annualSavings : 0;
@@ -214,10 +231,11 @@ export default function RetirementPage() {
       <h1 className="text-4xl font-bold text-center mb-12 text-gray-800">Retirement Calculator</h1>
       
       <div className="bg-white rounded-2xl p-8 shadow-lg mb-8">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Input Parameters</h2>
         <div className="grid md:grid-cols-3 gap-6">
           {/* Age Section */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Age Information</h3>
+            <h3 className="text-lg font-semibold text-emerald-700 mb-4 pb-2 border-b-2 border-emerald-200">Age Information</h3>
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700">Your Current Age (Years)</label>
               <input
@@ -249,7 +267,7 @@ export default function RetirementPage() {
 
           {/* Savings Section */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Savings Information</h3>
+            <h3 className="text-lg font-semibold text-emerald-700 mb-4 pb-2 border-b-2 border-emerald-200">Savings Information</h3>
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700">Current Savings Till Date</label>
               <input
@@ -282,7 +300,7 @@ export default function RetirementPage() {
 
           {/* Returns & Expenses Section */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Returns & Expenses</h3>
+            <h3 className="text-lg font-semibold text-emerald-700 mb-4 pb-2 border-b-2 border-emerald-200">Returns & Expenses</h3>
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700">Return on Investment (Pre-Tax %)</label>
               <input
