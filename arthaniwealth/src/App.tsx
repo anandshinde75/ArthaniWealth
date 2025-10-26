@@ -1,54 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Calculator, Target, TrendingUp, PieChart, Wallet, MessageCircle, Menu, X, Home, DollarSign, CheckCircle, Users } from 'lucide-react';
-import './App.css';
-import CalculatorsPage from './CalculatorsPage';
+import './css/App.css';
+import { storage, getSessionId } from './utils/storage';  // ADD THIS
 
-
-// Storage utility functions
-const storage = {
-  get: (key: string, defaultValue: any = null) => {
-    try {
-      const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : defaultValue;
-    } catch {
-      return defaultValue;
-    }
-  },
-  set: (key: string, value: any) => {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-    } catch (e) {
-      console.error('Storage error:', e);
-    }
-  },
-  session: {
-    get: (key: string, defaultValue: any = null) => {
-      try {
-        const item = sessionStorage.getItem(key);
-        return item ? JSON.parse(item) : defaultValue;
-      } catch {
-        return defaultValue;
-      }
-    },
-    set: (key: string, value: any) => {
-      try {
-        sessionStorage.setItem(key, JSON.stringify(value));
-      } catch (e) {
-        console.error('Session storage error:', e);
-      }
-    }
-  }
-};
-
-// Generate persistent session ID
-const getSessionId = () => {
-  let sessionId = localStorage.getItem('chatSessionId');
-  if (!sessionId) {
-    sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('chatSessionId', sessionId);
-  }
-  return sessionId;
-};
+// Import pages
+import HomePage from './pages/HomePage';
+import CalculatorsPage from './pages/CalculatorsPage';
+import RetirementPage from './pages/RetirementPage';
+import GoalsPage from './pages/GoalsPage';
+import RiskProfilePage from './pages/RiskProfilePage';
+import AssetsPage from './pages/AssetsPage';
+import IncomePage from './pages/IncomePage';
+import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
 
 // Main App Component
 export default function ArthaniWealth() {
@@ -105,14 +69,14 @@ export default function ArthaniWealth() {
     try {
       	
       	// Get persistent session ID
-    	const sessionId = getSessionId();
-    	
-    	 // Build conversation history (last 10 messages)
+      	const sessionId = getSessionId();
+      	
+      	 // Build conversation history (last 10 messages)
 	    const conversationHistory = chatMessages.slice(-10).map(msg => ({
 	      role: msg.type === 'user' ? 'user' : 'assistant',
 	      content: msg.text
-    }));
-          
+      }));
+        	
       // Replace with YOUR n8n webhook URL
       const response = await fetch('https://anand-n8n-1234.app.n8n.cloud/webhook/arthaniwealth-chat', {
         method: 'POST',
@@ -120,17 +84,17 @@ export default function ArthaniWealth() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-	        message: chatInput,
-	        sessionId: sessionId,  // Now persistent per browser
-	        userId: sessionId,     // Now persistent per browser
-	        history: conversationHistory,  // NEW: Include history
-	        context: {
-	          riskProfile: storage.get('riskProfile'),
-	          goals: storage.get('goals', []),
-	          assets: storage.get('assets', [])
-	        }
+	      	message: chatInput,
+	      	sessionId: sessionId,  // Now persistent per browser
+	      	userId: sessionId,     // Now persistent per browser
+	      	history: conversationHistory,  // NEW: Include history
+	      	context: {
+	      	  riskProfile: storage.get('riskProfile'),
+	      	  goals: storage.get('goals', []),
+	      	  assets: storage.get('assets', [])
+	      	}
 	      })
-    	});
+      	});
       
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -144,10 +108,10 @@ export default function ArthaniWealth() {
       // Extract response from n8n - adjust based on your workflow's response format
       const botResponse = data.reply || data.output || data.response || data.message || data.text || "I couldn't process that. Please try again.";
       
-      const botMsg = { 
-        type: 'bot', 
-        text: botResponse, 
-        time: new Date().toLocaleTimeString() 
+      const botMsg = { 
+        type: 'bot', 
+        text: botResponse, 
+        time: new Date().toLocaleTimeString() 
       };
       
       // Replace loading message with actual response
@@ -155,16 +119,16 @@ export default function ArthaniWealth() {
       
     } catch (error) {
       console.error('Error calling n8n:', error);
-      const errorMsg = { 
-        type: 'bot', 
-        text: "Sorry, I'm having trouble connecting. Please check your internet connection and try again.", 
-        time: new Date().toLocaleTimeString() 
+      const errorMsg = { 
+        type: 'bot', 
+        text: "Sorry, I'm having trouble connecting. Please check your internet connection and try again.", 
+        time: new Date().toLocaleTimeString() 
       };
       setChatMessages([...newMessages, errorMsg]);
     }
     
     setChatInput('');
-};
+  };
 
   const renderPage = () => {
     switch(currentPage) {
@@ -310,244 +274,3 @@ export default function ArthaniWealth() {
   );
 }
 
-function HomePage({ setCurrentPage }: { setCurrentPage: (page: string) => void }) {
-  return (
-    <div>
-      <section className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h1 className="text-5xl font-bold mb-6">Master Your Financial Future</h1>
-          <p className="text-xl mb-8 text-emerald-100">
-            Intelligent tools and insights to help you achieve your financial goals
-          </p>
-          <div className="flex gap-4 justify-center flex-wrap">
-            <button
-              onClick={() => setCurrentPage('calculators')}
-              className="px-8 py-3 bg-white text-emerald-600 rounded-full font-semibold hover:shadow-xl transition-all"
-            >
-              Explore Calculators
-            </button>
-            <button
-              onClick={() => setCurrentPage('risk')}
-              className="px-8 py-3 bg-emerald-700 text-white rounded-full font-semibold hover:bg-emerald-800 transition-all"
-            >
-              Start Risk Assessment
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-12 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-4">
-                <Users className="text-emerald-600" size={48} />
-              </div>
-              <h3 className="text-4xl font-bold text-gray-800 mb-2">10,000+</h3>
-              <p className="text-gray-600">Active Users</p>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-4">
-                <CheckCircle className="text-emerald-600" size={48} />
-              </div>
-              <h3 className="text-4xl font-bold text-gray-800 mb-2">50,000+</h3>
-              <p className="text-gray-600">Goals Achieved</p>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-4">
-                <DollarSign className="text-emerald-600" size={48} />
-              </div>
-              <h3 className="text-4xl font-bold text-gray-800 mb-2">₹500Cr+</h3>
-              <p className="text-gray-600">Wealth Managed</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
-            Powerful Financial Tools at Your Fingertips
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { icon: Calculator, title: 'Smart Calculators', desc: 'Loan, mortgage, investment, and savings calculators', page: 'calculators' },
-              { icon: Target, title: 'Goal Setting', desc: 'Set and track your financial goals with precision', page: 'goals' },
-              { icon: PieChart, title: 'Risk Profile', desc: 'Understand your investment risk tolerance', page: 'risk' },
-              { icon: TrendingUp, title: 'Retirement Planning', desc: 'Plan your retirement with advanced projections', page: 'retirement' },
-              { icon: Wallet, title: 'Asset Tracking', desc: 'Monitor assets, liabilities, and net worth', page: 'assets' },
-              { icon: DollarSign, title: 'Income & Expenses', desc: 'Track cash flow and identify savings opportunities', page: 'income' }
-            ].map((feature, idx) => (
-              <div
-                key={idx}
-                onClick={() => setCurrentPage(feature.page)}
-                className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer hover:-translate-y-1"
-              >
-                <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mb-4">
-                  <feature.icon className="text-white" size={28} />
-                </div>
-                <h3 className="text-xl font-bold mb-2 text-gray-800">{feature.title}</h3>
-                <p className="text-gray-600">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function RetirementPage() {
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold text-center mb-12 text-gray-800">Retirement Planning</h1>
-      <div className="bg-white rounded-2xl p-8 shadow-lg text-center">
-        <p className="text-gray-600">Retirement calculator coming soon!</p>
-      </div>
-    </div>
-  );
-}
-
-function GoalsPage() {
-  const [goals, setGoals] = useState<any[]>(() => storage.get('goals', []));
-
-  useEffect(() => {
-    storage.set('goals', goals);
-  }, [goals]);
-
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold text-center mb-12 text-gray-800">Financial Goals</h1>
-      <div className="bg-white rounded-2xl p-8 shadow-lg text-center">
-        <p className="text-gray-600">Goals tracker coming soon!</p>
-      </div>
-    </div>
-  );
-}
-
-function RiskProfilePage() {
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold text-center mb-12 text-gray-800">Risk Profile Assessment</h1>
-      <div className="bg-white rounded-2xl p-8 shadow-lg text-center">
-        <p className="text-gray-600">Risk assessment coming soon!</p>
-      </div>
-    </div>
-  );
-}
-
-function AssetsPage() {
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold text-center mb-12 text-gray-800">Assets & Liabilities</h1>
-      <div className="bg-white rounded-2xl p-8 shadow-lg text-center">
-        <p className="text-gray-600">Asset tracker coming soon!</p>
-      </div>
-    </div>
-  );
-}
-
-function IncomePage() {
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold text-center mb-12 text-gray-800">Income & Expenses</h1>
-      <div className="bg-white rounded-2xl p-8 shadow-lg text-center">
-        <p className="text-gray-600">Income tracker coming soon!</p>
-      </div>
-    </div>
-  );
-}
-
-function AboutPage() {
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold text-center mb-12 text-gray-800">About ArthaniWealth</h1>
-      <div className="bg-white rounded-2xl p-8 shadow-lg">
-        <p className="text-gray-700 mb-4">
-          ArthaniWealth is your trusted partner in financial planning and wealth management.
-        </p>
-        <p className="text-gray-700">
-          We provide intelligent tools and insights to help you achieve your financial goals.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function ContactPage() {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({ name: '', email: '', message: '' });
-    }, 3000);
-  };
-
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold text-center mb-12 text-gray-800">Contact Us</h1>
-
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-2xl p-8 shadow-lg">
-          <h2 className="text-2xl font-bold mb-6 text-gray-800">Get in Touch</h2>
-          
-          {submitted ? (
-            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-8 text-center">
-              <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="text-white" size={32} />
-              </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Thank You!</h3>
-              <p className="text-gray-600">We've received your message and will get back to you soon.</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700">Your Name</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-emerald-500"
-                  placeholder="John Doe"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700">Email Address</label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-emerald-500"
-                  placeholder="john@example.com"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700">Message</label>
-                <textarea
-                  required
-                  rows={5}
-                  value={formData.message}
-                  onChange={(e) => setFormData({...formData, message: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-emerald-500"
-                  placeholder="How can we help you?"
-                ></textarea>
-              </div>
-              <button
-                type="submit"
-                className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
-              >
-                Send Message
-              </button>
-            </form>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
