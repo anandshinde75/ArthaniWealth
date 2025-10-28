@@ -22,16 +22,16 @@ export default function RetirementPage() {
   const [isLoaded, setIsLoaded] = useState(false);
   
   // Input states
-  const [currentAge, setCurrentAge] = useState(50);
-  const [retirementAge, setRetirementAge] = useState(60);
-  const [lifeExpectancy, setLifeExpectancy] = useState(90);
-  const [currentSavings, setCurrentSavings] = useState(70000000);
-  const [monthlySaving, setMonthlySaving] = useState(600000);
+  const [currentAge, setCurrentAge] = useState(45);
+  const [retirementAge, setRetirementAge] = useState(55);
+  const [lifeExpectancy, setLifeExpectancy] = useState(85);
+  const [currentSavings, setCurrentSavings] = useState(30000000);
+  const [monthlySaving, setMonthlySaving] = useState(100000);
   const [savingsIncrease, setSavingsIncrease] = useState(10);
   const [preRetirementROI, setPreRetirementROI] = useState(13);
   const [capitalGainTax, setCapitalGainTax] = useState(12.5);
-  const [preRetirementExpenses, setPreRetirementExpenses] = useState(250000);
-  const [householdInflation, setHouseholdInflation] = useState(7);
+  const [preRetirementExpenses, setPreRetirementExpenses] = useState(100000);
+  const [householdInflation, setHouseholdInflation] = useState(6);
   const [postRetirementExpensesAuto, setPostRetirementExpensesAuto] = useState(0);
   const [postRetirementExpensesManual, setPostRetirementExpensesManual] = useState(0);
   const [lumpSumWithdrawals, setLumpSumWithdrawals] = useState<LumpSumWithdrawal[]>([]);
@@ -44,16 +44,16 @@ export default function RetirementPage() {
     const saved = storage.get('retirementCalculator');
     console.log('Loading retirement data:', saved); // Debug log
     if (saved) {
-      setCurrentAge(saved.currentAge || 50);
-      setRetirementAge(saved.retirementAge || 60);
-      setLifeExpectancy(saved.lifeExpectancy || 90);
-      setCurrentSavings(saved.currentSavings || 70000000);
-      setMonthlySaving(saved.monthlySaving || 600000);
+      setCurrentAge(saved.currentAge || 45);
+      setRetirementAge(saved.retirementAge || 55);
+      setLifeExpectancy(saved.lifeExpectancy || 85);
+      setCurrentSavings(saved.currentSavings || 30000000);
+      setMonthlySaving(saved.monthlySaving || 100000);
       setSavingsIncrease(saved.savingsIncrease || 10);
       setPreRetirementROI(saved.preRetirementROI || 13);
       setCapitalGainTax(saved.capitalGainTax || 12.5);
-      setPreRetirementExpenses(saved.preRetirementExpenses || 250000);
-      setHouseholdInflation(saved.householdInflation || 7);
+      setPreRetirementExpenses(saved.preRetirementExpenses || 100000);
+      setHouseholdInflation(saved.householdInflation || 6);
       setLumpSumWithdrawals(saved.lumpSumWithdrawals || []);
       if (saved.postRetirementExpensesManual) {
         setPostRetirementExpensesManual(saved.postRetirementExpensesManual);
@@ -230,6 +230,49 @@ export default function RetirementPage() {
     <div className="max-w-7xl mx-auto px-4 py-12">
       <h1 className="text-4xl font-bold text-center mb-12 text-gray-800">Retirement Calculator</h1>
       
+      {/* Reset Button */}
+          <div className="flex justify-end mb-6">
+            <button
+              onClick={() => {
+                localStorage.removeItem('retirementCalculator');
+                /*setCurrentAge(45);
+                setRetirementAge(55);
+                setLifeExpectancy(85);
+                setCurrentSavings(30000000);
+                setMonthlySaving(100000);
+                setSavingsIncrease(10);
+                setPreRetirementROI(13);
+                setCapitalGainTax(12.5);
+                setPreRetirementExpenses(100000);
+                setHouseholdInflation(7);
+                setPostRetirementExpensesAuto(0);
+                setPostRetirementExpensesManual(0);
+                setLumpSumWithdrawals([]);
+                setSimulationData([]);*/
+                setCurrentAge(0);
+		setRetirementAge(0);
+		setLifeExpectancy(0);
+		setCurrentSavings(0);
+		setMonthlySaving(0);
+		setSavingsIncrease(0);
+		setPreRetirementROI(0);
+		setCapitalGainTax(0);
+		setPreRetirementExpenses(0);
+		setHouseholdInflation(0);
+		setPostRetirementExpensesAuto(0);
+		setPostRetirementExpensesManual(0);
+		setLumpSumWithdrawals([]);
+                setSimulationData([]);
+
+                
+              }}
+              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all"
+            >
+              🔄 Reset
+            </button>
+    </div>
+      
+      
       <div className="bg-white rounded-2xl p-8 shadow-lg mb-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Input Parameters</h2>
         <div className="grid md:grid-cols-3 gap-6">
@@ -366,7 +409,20 @@ export default function RetirementPage() {
       </div>
 	
 	{/* Retirement Readiness Summary */}
-	{simulationData.length > 0 && (() => {
+	{currentAge === 0 &&
+	  retirementAge === 0 &&
+	  lifeExpectancy === 0 &&
+	  currentSavings === 0 &&
+	  monthlySaving === 0 &&
+	  savingsIncrease === 0 &&
+	  preRetirementROI === 0 &&
+	  capitalGainTax === 0 &&
+	  preRetirementExpenses === 0 &&
+	  householdInflation === 0 ? (
+	    <div className="bg-white text-center py-10 rounded-2xl shadow-md mb-10 text-gray-600">
+	      🧮 Please enter your retirement details to see your summary.
+	    </div>
+	  ) : (simulationData.length > 0 && (() => {
 	  // Determine corpus at retirement
 	  const retirementRow = simulationData.find(r => r.age === retirementAge);
 	  const corpusAtRetirement = retirementRow ? retirementRow.corpusAtBeginning : 0;
@@ -454,7 +510,8 @@ export default function RetirementPage() {
 	      </div>
 	    </div>
 	  );
-	})()}
+	})()
+	)}
 
 	
       {/* Simulation Table */}
