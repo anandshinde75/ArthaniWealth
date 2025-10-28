@@ -1,0 +1,9 @@
+
+> arthaniwealth@0.1.0 predeploy
+> npm run build
+
+
+> arthaniwealth@0.1.0 build
+> react-scripts build
+
+^C^C^C

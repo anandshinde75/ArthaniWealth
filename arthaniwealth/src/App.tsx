@@ -12,6 +12,7 @@ import AssetsPage from './pages/AssetsPage';
 import IncomePage from './pages/IncomePage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
+import InsurancePage from './pages/InsurancePage';
 
 // Import Chat Widget
 import ChatWidget from './components/ChatWidget';
@@ -24,10 +25,11 @@ export default function ArthaniWealth() {
   const renderPage = () => {
     switch(currentPage) {
       case 'home': return <HomePage setCurrentPage={setCurrentPage} />;
+      case 'risk': return <RiskProfilePage />;
+      case 'goals': return <GoalsPage />;
       case 'calculators': return <CalculatorsPage />;
       case 'retirement': return <RetirementPage />;
-      case 'goals': return <GoalsPage />;
-      case 'risk': return <RiskProfilePage />;
+      case 'insurance': return <InsurancePage />;
       case 'assets': return <AssetsPage />;
       case 'income': return <IncomePage />;
       case 'about': return <AboutPage />;
@@ -38,10 +40,11 @@ export default function ArthaniWealth() {
 
   const navItems = [
     { id: 'home', label: 'Home' },
+    { id: 'risk', label: 'Risk' },
+    { id: 'goals', label: 'Goals' },
     { id: 'calculators', label: 'Calculators' },
     { id: 'retirement', label: 'Retirement' },
-    { id: 'goals', label: 'Goals' },
-    { id: 'risk', label: 'Risk' },
+    { id: 'insurance', label: 'Insurance' },
     { id: 'assets', label: 'Assets' },
     { id: 'income', label: 'Income' },
     { id: 'about', label: 'About' },
