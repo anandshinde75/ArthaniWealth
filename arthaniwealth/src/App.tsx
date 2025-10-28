@@ -27,11 +27,11 @@ export default function ArthaniWealth() {
       case 'home': return <HomePage setCurrentPage={setCurrentPage} />;
       case 'risk': return <RiskProfilePage />;
       case 'goals': return <GoalsPage />;
-      case 'calculators': return <CalculatorsPage />;
       case 'retirement': return <RetirementPage />;
       case 'insurance': return <InsurancePage />;
       case 'assets': return <AssetsPage />;
       case 'income': return <IncomePage />;
+      case 'calculators': return <CalculatorsPage />;
       case 'about': return <AboutPage />;
       case 'contact': return <ContactPage />;
       default: return <HomePage setCurrentPage={setCurrentPage} />;
@@ -42,11 +42,11 @@ export default function ArthaniWealth() {
     { id: 'home', label: 'Home' },
     { id: 'risk', label: 'Risk' },
     { id: 'goals', label: 'Goals' },
-    { id: 'calculators', label: 'Calculators' },
     { id: 'retirement', label: 'Retirement' },
     { id: 'insurance', label: 'Insurance' },
     { id: 'assets', label: 'Assets' },
     { id: 'income', label: 'Income' },
+    { id: 'calculators', label: 'Calculators' },
     { id: 'about', label: 'About' },
     { id: 'contact', label: 'Contact' }
   ];
