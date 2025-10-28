@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calculator, Target, TrendingUp, PieChart, Wallet, DollarSign, CheckCircle, Users } from 'lucide-react';
+import { Calculator, Target, TrendingUp, PieChart, Wallet, DollarSign, Shield, CheckCircle, Users } from 'lucide-react';
 
 interface HomePageProps {
   setCurrentPage: (page: string) => void;
@@ -66,12 +66,14 @@ export default function HomePage({ setCurrentPage }: HomePageProps) {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { icon: Calculator, title: 'Smart Calculators', desc: 'Loan, mortgage, investment, and savings calculators', page: 'calculators' },
-              { icon: Target, title: 'Goal Setting', desc: 'Set and track your financial goals with precision', page: 'goals' },
               { icon: PieChart, title: 'Risk Profile', desc: 'Understand your investment risk tolerance', page: 'risk' },
-              { icon: TrendingUp, title: 'Retirement Planning', desc: 'Plan your retirement with advanced projections', page: 'retirement' },
+              { icon: DollarSign, title: 'Income & Expenses', desc: 'Track cash flow and identify savings opportunities', page: 'income' },
               { icon: Wallet, title: 'Asset Tracking', desc: 'Monitor assets, liabilities, and net worth', page: 'assets' },
-              { icon: DollarSign, title: 'Income & Expenses', desc: 'Track cash flow and identify savings opportunities', page: 'income' }
+              { icon: Target, title: 'Goal Setting', desc: 'Set and track your financial goals with precision', page: 'goals' },
+              { icon: TrendingUp, title: 'Retirement Planning', desc: 'Plan your retirement with advanced projections', page: 'retirement' },
+              { icon: Shield, title: 'Insurance Planning', desc: 'Evaluate and optimize your insurance coverage for better protection', page: 'insurance' },
+              { icon: Calculator, title: 'Smart Calculators', desc: 'Loan, mortgage, investment, and savings calculators', page: 'calculators' },           
+              
             ].map((feature, idx) => (
               <div
                 key={idx}

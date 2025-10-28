@@ -26,11 +26,11 @@ export default function ArthaniWealth() {
     switch(currentPage) {
       case 'home': return <HomePage setCurrentPage={setCurrentPage} />;
       case 'risk': return <RiskProfilePage />;
+      case 'income': return <IncomePage />;
+      case 'assets': return <AssetsPage />;
       case 'goals': return <GoalsPage />;
       case 'retirement': return <RetirementPage />;
       case 'insurance': return <InsurancePage />;
-      case 'assets': return <AssetsPage />;
-      case 'income': return <IncomePage />;
       case 'calculators': return <CalculatorsPage />;
       case 'about': return <AboutPage />;
       case 'contact': return <ContactPage />;
@@ -41,11 +41,11 @@ export default function ArthaniWealth() {
   const navItems = [
     { id: 'home', label: 'Home' },
     { id: 'risk', label: 'Risk' },
+    { id: 'income', label: 'Income' },
+    { id: 'assets', label: 'Assets' },
     { id: 'goals', label: 'Goals' },
     { id: 'retirement', label: 'Retirement' },
     { id: 'insurance', label: 'Insurance' },
-    { id: 'assets', label: 'Assets' },
-    { id: 'income', label: 'Income' },
     { id: 'calculators', label: 'Calculators' },
     { id: 'about', label: 'About' },
     { id: 'contact', label: 'Contact' }
