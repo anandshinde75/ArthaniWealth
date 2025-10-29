@@ -56,7 +56,8 @@ export default function GoalsPage() {
       finalCapital: 0,
       shortfallSurplus: 0,
     };
-    setGoals([...goals, newGoal]);
+    //setGoals([...goals, newGoal]);
+    setGoals([newGoal, ...goals]);
   };
 
   // Calculate goal fields

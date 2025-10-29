@@ -90,10 +90,13 @@ export default function IncomePage() {
       date: new Date().toISOString().slice(0, 10),
       notes: ''
     };
-    setIncomes([...incomes, newIncome]);
+
+    setIncomes([newIncome, ...incomes]);
+    
   };
 
   // Add new expense
+  
   const addExpense = () => {
     const newExpense: ExpenseEntry = {
       id: Date.now().toString(),
@@ -104,7 +107,8 @@ export default function IncomePage() {
       date: new Date().toISOString().slice(0, 10),
       notes: ''
     };
-    setExpenses([...expenses, newExpense]);
+
+    setExpenses([newExpense, ...expenses]);
   };
 
   // Update income

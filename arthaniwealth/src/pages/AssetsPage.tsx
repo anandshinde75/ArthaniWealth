@@ -71,7 +71,8 @@ export default function AssetsPage() {
       value: 0,
       notes: ''
     };
-    setAssets([...assets, newAsset]);
+
+    setAssets([newAsset, ...assets]);
     setEditingId(newAsset.id);
   };
 
@@ -85,7 +86,8 @@ export default function AssetsPage() {
       interestRate: 0,
       notes: ''
     };
-    setLiabilities([...liabilities, newLiability]);
+
+    setLiabilities([newLiability, ...liabilities]);
     setEditingId(newLiability.id);
   };
 
