@@ -79,7 +79,8 @@ export default function InsurancePage() {
       name: '',
       amount: 0
     };
-    setLoans([...loans, newLoan]);
+    //setLoans([...loans, newLoan]);
+    setLoans([newLoan, ...loans]);
   };
 
   const updateLoan = (id: string, field: keyof LoanEntry, value: string | number) => {
