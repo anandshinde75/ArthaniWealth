@@ -79,7 +79,7 @@ export default function InsurancePage() {
       name: '',
       amount: 0
     };
-    //setLoans([...loans, newLoan]);
+
     setLoans([newLoan, ...loans]);
   };
 
@@ -100,7 +100,8 @@ export default function InsurancePage() {
       name: '',
       amount: 0
     };
-    setGoals([...goals, newGoal]);
+    // setGoals([...goals, newGoal]);
+    setGoals([newGoal, ...goals]);
   };
 
   const updateGoal = (id: string, field: keyof GoalEntry, value: string | number) => {
