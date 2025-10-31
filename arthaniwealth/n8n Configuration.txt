@@ -214,8 +214,7 @@ Google Gemini Chat Model
 
 Simple Memory
 	Session ID: 	Define below
-	Key:
-		Session Key:{{ $json.userId }}
+	Key:		Session Key:{{ $json.userId }}
 	 
 	Context Window Length
 	10
