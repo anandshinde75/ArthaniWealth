@@ -226,8 +226,7 @@ export default function ChatWidget() {
 
       // Replace with YOUR n8n webhook URL
       const response = await fetch(
-       // "https://anand-n8n-1234.app.n8n.cloud/webhook/arthaniwealth-chat",
-        "https://arthaniwealth.app.n8n.cloud/webhook/arthaniwealth-chat",
+       "https://arthaniwealth.app.n8n.cloud/webhook/arthaniwealth-chat",
         {
           method: "POST",
           headers: {
