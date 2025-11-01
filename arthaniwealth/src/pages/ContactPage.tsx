@@ -19,7 +19,7 @@ export default function ContactPage() {
 
     try {
       // Replace with your n8n webhook URL for contact form
-      const response = await fetch('https://anand-n8n-1234.app.n8n.cloud/webhook/arthaniwealth-contact', {
+      const response = await fetch('https://arthaniwealth.app.n8n.cloud/webhook/contact-form', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
