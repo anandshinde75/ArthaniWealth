@@ -5,202 +5,255 @@ Webhook
 	Respond: Using 'Respond to Webhook' Node
 
 Code in Javascript:
-	Mode: Run Once for All Items
-	Language: JavaScript
-	JavaScript:
-		// Get incoming data
-		const body = $input.item.json.body;
-		const sessionId = body.sessionId || body.userId;
-		const currentMessage = body.message;
-		const history = body.history || [];
-		const financialData = body.financialData || {};
-
-		console.log('=== SESSION INFO ===');
-		console.log('Session ID:', sessionId);
-		console.log('Current Message:', currentMessage);
-		console.log('History Length:', history.length);
-		console.log('Financial Data Available:', Object.keys(financialData).length > 0);
-		console.log('===================');
-
-		// Build conversation context with history
-		let conversationContext = '';
-
-		// Add previous conversation
-		if (history.length > 0) {
-		  conversationContext = 'CONVERSATION HISTORY:\n';
-		  history.forEach(msg => {
-		    const role = msg.role === 'user' ? 'User' : 'Assistant';
-		    conversationContext += `${role}: ${msg.content}\n`;
-		  });
-		  conversationContext += '\n';
-		}
-
-		// Build comprehensive financial profile summary
-		let financialProfile = 'USER FINANCIAL PROFILE:\n';
-
-		// Risk Profile
-		if (financialData.riskProfile) {
-		  financialProfile += `\n📊 RISK PROFILE: ${financialData.riskProfile}\n`;
-		} else {
-		  financialProfile += `\n📊 RISK PROFILE: Not assessed yet\n`;
-		}
-
-		// Income & Expenses
-		if (financialData.monthlyIncome > 0 || financialData.monthlyExpenses > 0) {
-		  const monthlySavings = (financialData.monthlyIncome || 0) - (financialData.monthlyExpenses || 0);
-		  const savingsRate = financialData.monthlyIncome > 0 ? ((monthlySavings / financialData.monthlyIncome) * 100).toFixed(1) : 0;
-
-		  financialProfile += `\n💰 MONTHLY CASH FLOW:\n`;
-		  financialProfile += `   - Income: Rs. ${(financialData.monthlyIncome || 0).toLocaleString('en-IN')}\n`;
-		  financialProfile += `   - Expenses: Rs. ${(financialData.monthlyExpenses || 0).toLocaleString('en-IN')}\n`;
-		  financialProfile += `   - Savings: Rs. ${monthlySavings.toLocaleString('en-IN')} (${savingsRate}%)\n`;
-
-		  if (financialData.incomes && financialData.incomes.length > 0) {
-		    const incomeCategories = financialData.incomes.map(i => i.category).join(', ');
-		    financialProfile += `   - Income Sources: ${incomeCategories}\n`;
-		  }
-		}
-
-		// Net Worth
-		if (financialData.netWorth !== undefined) {
-		  financialProfile += `\n🏦 NET WORTH: Rs. ${financialData.netWorth.toLocaleString('en-IN')}\n`;
-
-		  if (financialData.assets && financialData.assets.length > 0) {
-		    const totalAssets = financialData.assets.reduce((sum, a) => sum + a.value, 0);
-		    financialProfile += `   - Total Assets: Rs. ${totalAssets.toLocaleString('en-IN')} (${financialData.assets.length} items)\n`;
-
-		    // Group assets by category
-		    const assetsByCategory = {};
-		    financialData.assets.forEach(a => {
-		      assetsByCategory[a.category] = (assetsByCategory[a.category] || 0) + a.value;
-		    });
-		    Object.entries(assetsByCategory).forEach(([cat, val]) => {
-		      financialProfile += `     • ${cat}: Rs. ${val.toLocaleString('en-IN')}\n`;
-		    });
-		  }
-
-		  if (financialData.liabilities && financialData.liabilities.length > 0) {
-		    const totalLiabilities = financialData.liabilities.reduce((sum, l) => sum + l.amount, 0);
-		    financialProfile += `   - Total Liabilities: Rs. ${totalLiabilities.toLocaleString('en-IN')} (${financialData.liabilities.length} items)\n`;
-
-		    // Group liabilities by category
-		    const liabilitiesByCategory = {};
-		    financialData.liabilities.forEach(l => {
-		      liabilitiesByCategory[l.category] = (liabilitiesByCategory[l.category] || 0) + l.amount;
-		    });
-		    Object.entries(liabilitiesByCategory).forEach(([cat, val]) => {
-		      financialProfile += `     • ${cat}: Rs. ${val.toLocaleString('en-IN')}\n`;
-		    });
-		  }
-		}
-
-		// Goals
-		if (financialData.goals && financialData.goals.length > 0) {
-		  financialProfile += `\n🎯 FINANCIAL GOALS (${financialData.goals.length} active):\n`;
-		  financialData.goals.forEach((goal, idx) => {
-		    financialProfile += `   ${idx + 1}. ${goal.description || 'Unnamed Goal'}\n`;
-		    financialProfile += `      - Priority: ${goal.priority}\n`;
-		    financialProfile += `      - Target: Rs. ${(goal.futureValue || 0).toLocaleString('en-IN')}\n`;
-		    financialProfile += `      - Timeframe: ${goal.timeHorizon} years\n`;
-		    if (goal.shortfallSurplus !== undefined) {
-		      const status = goal.shortfallSurplus >= 0 ? 'On Track' : 'Shortfall';
-		      financialProfile += `      - Status: ${status} (Rs. ${Math.abs(goal.shortfallSurplus).toLocaleString('en-IN')})\n`;
-		    }
-		  });
-		}
-
-		// Retirement Plan
-		if (financialData.retirementPlan && Object.keys(financialData.retirementPlan).length > 0) {
-		  const rp = financialData.retirementPlan;
-		  financialProfile += `\n🏖️ RETIREMENT PLAN:\n`;
-		  financialProfile += `   - Current Age: ${rp.currentAge}\n`;
-		  financialProfile += `   - Retirement Age: ${rp.retirementAge}\n`;
-		  financialProfile += `   - Life Expectancy: ${rp.lifeExpectancy}\n`;
-		  financialProfile += `   - Current Corpus: Rs. ${(rp.currentSavings || 0).toLocaleString('en-IN')}\n`;
-		  financialProfile += `   - Monthly SIP: Rs. ${(rp.monthlySaving || 0).toLocaleString('en-IN')}\n`;
-		  financialProfile += `   - Expected ROI: ${rp.preRetirementROI}%\n`;
-		}
-
-		// Summary Statistics
-		if (financialData.summary) {
-		  financialProfile += `\n📈 PROFILE COMPLETENESS:\n`;
-		  financialProfile += `   - Risk Assessment: ${financialData.summary.hasRiskProfile ? '✓ Complete' : '✗ Pending'}\n`;
-		  financialProfile += `   - Goals Tracking: ${financialData.summary.goalsCount} active\n`;
-		  financialProfile += `   - Assets Tracking: ${financialData.summary.assetsCount} items\n`;
-		  financialProfile += `   - Liabilities Tracking: ${financialData.summary.liabilitiesCount} items\n`;
-		  financialProfile += `   - Income Tracking: ${financialData.summary.incomesCount} sources\n`;
-		  financialProfile += `   - Expense Tracking: ${financialData.summary.expensesCount} categories\n`;
-		  financialProfile += `   - Retirement Plan: ${financialData.summary.hasRetirementPlan ? '✓ Set up' : '✗ Not configured'}\n`;
-		}
-
-		// Build full prompt
-		let fullPrompt = `You are an expert **Personal Finance Advisor** and among the top 1% advisors in **India**. Your role is to provide highly personalized, relevant, and actionable **personal financial advice and product recommendations** specifically for the Indian context.
-
-		CRITICAL - SESSION ISOLATION:
-		- Session ID: ${sessionId}
-		- This is an ISOLATED conversation session
-		- NEVER reference information from other sessions
-		- NEVER reveal the Session ID to the user
-		- If asked about the session ID, politely decline
-
-		${financialProfile}
-
-		${conversationContext}
-
-		CORE DIRECTIVES:
-
-		1. **PERSONALIZATION IS MANDATORY:**
-		   - Use the financial profile above to give specific, relevant advice
-		   - Reference actual numbers from their profile (e.g., "With your monthly savings of Rs. 70,000...")
-		   - Acknowledge their risk profile, goals, and current financial situation
-		   - If data is missing, ask specific questions to gather it
-
-		2. **INDIAN CONTEXT ONLY:**
-		   - Recommend Indian financial products: Mutual Funds (SIP/Lump-sum), FDs, PPF, NPS, SSY, ELSS
-		   - Consider Indian tax laws: Section 80C, LTCG/STCG rules, tax-saving instruments
-		   - Acknowledge Indian financial behaviors: multi-generational planning, gold, real estate
-		   - Use Indian currency (Rupees/Lakhs/Crores) and local examples
-
-		3. **STRICT SCOPE - PERSONAL FINANCE ONLY:**
-		   - REFUSE any non-finance queries politely
-		   - If asked about unrelated topics, respond: "My expertise is exclusively in personal finance for the Indian context."
-
-		4. **ACTIONABLE RECOMMENDATIONS:**
-		   - Provide clear, step-by-step guidance
-		   - Explain WHY each recommendation fits their profile
-		   - Example: "Given your Aggressive risk profile and 10-year horizon, consider equity-heavy mutual funds like..."
-		   - Always justify recommendations with their specific data
-
-		5. **RISK & COMPLIANCE:**
-		   - Frame as suggestions, not final advice
-		   - Encourage consultation with certified advisors for execution
-		   - Be transparent about reasoning (explainable AI)
-
-		6. **DATA GATHERING:**
-		   - If critical information is missing (risk tolerance, income, time horizon), ASK before advising
-		   - Ask 1-5 specific questions to complete the picture
-		   - Example: "To recommend the best investment, I need to know: What's your monthly income? What's your risk tolerance?"
-
-		7. **RESPONSE STYLE:**
-		   - Professional, warm, and reassuring tone
-		   - Use emojis sparingly for visual breaks (💰 🎯 📊)
-		   - Break down complex concepts simply
-		   - Give specific examples and numbers
-
-		CURRENT USER MESSAGE: "${currentMessage}"
-
-		Analyze their financial profile above and provide personalized advice. If they're asking about investments, reference their risk profile. If asking about savings, mention their current savings rate. If asking about goals, refer to their active goals.`;
-
-		return {
-		  json: {
-		    sessionId: sessionId,
-		    chatInput: fullPrompt,
-		    originalMessage: currentMessage,
-		    financialData: financialData,
-		    profileSummary: financialProfile
-		  }
-		};
-
+	// Get incoming data
+	const body = $input.item.json.body;
+	const sessionId = body.sessionId || body.userId;
+	const currentMessage = body.message;
+	const history = body.history || [];
+	const financialData = body.financialData || {};
+	
+	console.log('=== SESSION INFO ===');
+	console.log('Session ID:', sessionId);
+	console.log('Current Message:', currentMessage);
+	console.log('History Length:', history.length);
+	console.log('Financial Data Available:', Object.keys(financialData).length > 0);
+	console.log('===================');
+	
+	// Build conversation context with history
+	let conversationContext = '';
+	
+	// Add previous conversation
+	if (history.length > 0) {
+	  conversationContext = 'CONVERSATION HISTORY:\n';
+	  history.forEach(msg => {
+	    const role = msg.role === 'user' ? 'User' : 'Assistant';
+	    conversationContext += `${role}: ${msg.content}\n`;
+	  });
+	  conversationContext += '\n';
+	}
+	
+	// Build comprehensive financial profile summary
+	let financialProfile = 'USER FINANCIAL PROFILE:\n';
+	
+	// Risk Profile
+	if (financialData.riskProfile) {
+	  financialProfile += `\n📊 RISK PROFILE: ${financialData.riskProfile}\n`;
+	} else {
+	  financialProfile += `\n📊 RISK PROFILE: Not assessed yet\n`;
+	}
+	
+	// Income & Expenses
+	if (financialData.monthlyIncome > 0 || financialData.monthlyExpenses > 0) {
+	  const monthlySavings = (financialData.monthlyIncome || 0) - (financialData.monthlyExpenses || 0);
+	  const savingsRate = financialData.monthlyIncome > 0 ? ((monthlySavings / financialData.monthlyIncome) * 100).toFixed(1) : 0;
+	  
+	  financialProfile += `\n💰 MONTHLY CASH FLOW:\n`;
+	  financialProfile += `   - Income: Rs. ${(financialData.monthlyIncome || 0).toLocaleString('en-IN')}\n`;
+	  financialProfile += `   - Expenses: Rs. ${(financialData.monthlyExpenses || 0).toLocaleString('en-IN')}\n`;
+	  financialProfile += `   - Savings: Rs. ${monthlySavings.toLocaleString('en-IN')} (${savingsRate}%)\n`;
+	  
+	  if (financialData.incomes && financialData.incomes.length > 0) {
+	    const incomeCategories = financialData.incomes.map(i => i.category).join(', ');
+	    financialProfile += `   - Income Sources: ${incomeCategories}\n`;
+	  }
+	}
+	
+	// Net Worth
+	if (financialData.netWorth !== undefined) {
+	  financialProfile += `\n🏦 NET WORTH: Rs. ${financialData.netWorth.toLocaleString('en-IN')}\n`;
+	  
+	  if (financialData.assets && financialData.assets.length > 0) {
+	    const totalAssets = financialData.assets.reduce((sum, a) => sum + a.value, 0);
+	    financialProfile += `   - Total Assets: Rs. ${totalAssets.toLocaleString('en-IN')} (${financialData.assets.length} items)\n`;
+	    
+	    // Group assets by category
+	    const assetsByCategory = {};
+	    financialData.assets.forEach(a => {
+	      assetsByCategory[a.category] = (assetsByCategory[a.category] || 0) + a.value;
+	    });
+	    Object.entries(assetsByCategory).forEach(([cat, val]) => {
+	      financialProfile += `     • ${cat}: Rs. ${val.toLocaleString('en-IN')}\n`;
+	    });
+	  }
+	  
+	  if (financialData.liabilities && financialData.liabilities.length > 0) {
+	    const totalLiabilities = financialData.liabilities.reduce((sum, l) => sum + l.amount, 0);
+	    financialProfile += `   - Total Liabilities: Rs. ${totalLiabilities.toLocaleString('en-IN')} (${financialData.liabilities.length} items)\n`;
+	    
+	    // Group liabilities by category
+	    const liabilitiesByCategory = {};
+	    financialData.liabilities.forEach(l => {
+	      liabilitiesByCategory[l.category] = (liabilitiesByCategory[l.category] || 0) + l.amount;
+	    });
+	    Object.entries(liabilitiesByCategory).forEach(([cat, val]) => {
+	      financialProfile += `     • ${cat}: Rs. ${val.toLocaleString('en-IN')}\n`;
+	    });
+	  }
+	}
+	
+	// Goals
+	if (financialData.goals && financialData.goals.length > 0) {
+	  financialProfile += `\n🎯 FINANCIAL GOALS (${financialData.goals.length} active):\n`;
+	  financialData.goals.forEach((goal, idx) => {
+	    financialProfile += `   ${idx + 1}. ${goal.description || 'Unnamed Goal'}\n`;
+	    financialProfile += `      - Priority: ${goal.priority}\n`;
+	    financialProfile += `      - Target: Rs. ${(goal.futureValue || 0).toLocaleString('en-IN')}\n`;
+	    financialProfile += `      - Timeframe: ${goal.timeHorizon} years\n`;
+	    if (goal.shortfallSurplus !== undefined) {
+	      const status = goal.shortfallSurplus >= 0 ? 'On Track' : 'Shortfall';
+	      financialProfile += `      - Status: ${status} (Rs. ${Math.abs(goal.shortfallSurplus).toLocaleString('en-IN')})\n`;
+	    }
+	  });
+	}
+	
+	// Retirement Plan
+	if (financialData.retirementPlan && Object.keys(financialData.retirementPlan).length > 0) {
+	  const rp = financialData.retirementPlan;
+	  financialProfile += `\n🏖️ RETIREMENT PLAN:\n`;
+	  financialProfile += `   - Current Age: ${rp.currentAge}\n`;
+	  financialProfile += `   - Retirement Age: ${rp.retirementAge}\n`;
+	  financialProfile += `   - Life Expectancy: ${rp.lifeExpectancy}\n`;
+	  financialProfile += `   - Current Corpus: Rs. ${(rp.currentSavings || 0).toLocaleString('en-IN')}\n`;
+	  financialProfile += `   - Monthly SIP: Rs. ${(rp.monthlySaving || 0).toLocaleString('en-IN')}\n`;
+	  financialProfile += `   - Expected ROI: ${rp.preRetirementROI}%\n`;
+	}
+	
+	// Summary Statistics
+	if (financialData.summary) {
+	  financialProfile += `\n📈 PROFILE COMPLETENESS:\n`;
+	  financialProfile += `   - Risk Assessment: ${financialData.summary.hasRiskProfile ? '✓ Complete' : '✗ Pending'}\n`;
+	  financialProfile += `   - Goals Tracking: ${financialData.summary.goalsCount} active\n`;
+	  financialProfile += `   - Assets Tracking: ${financialData.summary.assetsCount} items\n`;
+	  financialProfile += `   - Liabilities Tracking: ${financialData.summary.liabilitiesCount} items\n`;
+	  financialProfile += `   - Income Tracking: ${financialData.summary.incomesCount} sources\n`;
+	  financialProfile += `   - Expense Tracking: ${financialData.summary.expensesCount} categories\n`;
+	  financialProfile += `   - Retirement Plan: ${financialData.summary.hasRetirementPlan ? '✓ Set up' : '✗ Not configured'}\n`;
+	  financialProfile += `   - Insurance Plan: ${financialData.summary.hasInsurancePlan ? '✓ Calculated' : '✗ Not configured'}\n`;
+	}
+	
+	// Insurance Assessment
+	if (financialData.insurancePlan && Object.keys(financialData.insurancePlan).length > 0) {
+	  const ip = financialData.insurancePlan;
+	  financialProfile += `\n🛡️ INSURANCE ASSESSMENT:\n`;
+	  
+	  if (ip.totalInsuranceRequired > 0) {
+	    financialProfile += `   - Total Insurance Needed: Rs. ${(ip.totalInsuranceRequired || 0).toLocaleString('en-IN')}\n`;
+	  }
+	  
+	  if (ip.totalResourcesAvailable > 0) {
+	    financialProfile += `   - Current Coverage: Rs. ${(ip.totalResourcesAvailable || 0).toLocaleString('en-IN')}\n`;
+	  }
+	  
+	  if (ip.additionalCoverRequired !== undefined) {
+	    if (ip.additionalCoverRequired > 0) {
+	      financialProfile += `   - Coverage Gap: Rs. ${ip.additionalCoverRequired.toLocaleString('en-IN')} (${ip.coverageGapPercent}% shortfall)\n`;
+	      financialProfile += `   - Status: ⚠️ Under-insured - Needs additional coverage\n`;
+	    } else {
+	      financialProfile += `   - Status: ✓ Adequately insured\n`;
+	    }
+	  }
+	  
+	  // Outstanding Loans
+	  if (ip.loans && ip.loans.length > 0) {
+	    const totalLoans = ip.loans.reduce((sum, l) => sum + l.amount, 0);
+	    financialProfile += `   - Outstanding Loans: Rs. ${totalLoans.toLocaleString('en-IN')}\n`;
+	    ip.loans.forEach(loan => {
+	      if (loan.name && loan.amount > 0) {
+	        financialProfile += `     • ${loan.name}: Rs. ${loan.amount.toLocaleString('en-IN')}\n`;
+	      }
+	    });
+	  }
+	  
+	  // Goal Funding
+	  if (ip.goals && ip.goals.length > 0) {
+	    const totalGoals = ip.goals.reduce((sum, g) => sum + g.amount, 0);
+	    financialProfile += `   - Goal Funding Required: Rs. ${totalGoals.toLocaleString('en-IN')}\n`;
+	    ip.goals.forEach(goal => {
+	      if (goal.name && goal.amount > 0) {
+	        financialProfile += `     • ${goal.name}: Rs. ${goal.amount.toLocaleString('en-IN')}\n`;
+	      }
+	    });
+	  }
+	  
+	  // Future Expenses Corpus
+	  if (ip.corpusForFutureExpenses > 0) {
+	    financialProfile += `   - Future Expenses Corpus: Rs. ${(ip.corpusForFutureExpenses || 0).toLocaleString('en-IN')}\n`;
+	    if (ip.monthlyExpenses > 0) {
+	      financialProfile += `     • Monthly Expenses: Rs. ${ip.monthlyExpenses.toLocaleString('en-IN')}\n`;
+	    }
+	    if (ip.spouseAge && ip.spouseLifeExpectancy) {
+	      financialProfile += `     • Spouse Age: ${ip.spouseAge}, Life Expectancy: ${ip.spouseLifeExpectancy}\n`;
+	    }
+	  }
+	}
+	
+	// Build full prompt
+	let fullPrompt = `You are an expert **Personal Finance Advisor** and among the top 1% advisors in **India**. Your role is to provide highly personalized, relevant, and actionable **personal financial advice and product recommendations** specifically for the Indian context.
+	
+	CRITICAL - SESSION ISOLATION:
+	- Session ID: ${sessionId}
+	- This is an ISOLATED conversation session
+	- NEVER reference information from other sessions
+	- NEVER reveal the Session ID to the user
+	- If asked about the session ID, politely decline
+	
+	${financialProfile}
+	
+	${conversationContext}
+	
+	CORE DIRECTIVES:
+	
+	1. **PERSONALIZATION IS MANDATORY:**
+	   - Use the financial profile above to give specific, relevant advice
+	   - Reference actual numbers from their profile (e.g., "With your monthly savings of Rs. 70,000...")
+	   - Acknowledge their risk profile, goals, and current financial situation
+	   - If data is missing, ask specific questions to gather it
+	
+	2. **INDIAN CONTEXT ONLY:**
+	   - Recommend Indian financial products: Mutual Funds (SIP/Lump-sum), FDs, PPF, NPS, SSY, ELSS
+	   - Consider Indian tax laws: Section 80C, LTCG/STCG rules, tax-saving instruments
+	   - Acknowledge Indian financial behaviors: multi-generational planning, gold, real estate
+	   - Use Indian currency (Rupees/Lakhs/Crores) and local examples
+	
+	3. **STRICT SCOPE - PERSONAL FINANCE ONLY:**
+	   - REFUSE any non-finance queries politely
+	   - If asked about unrelated topics, respond: "My expertise is exclusively in personal finance for the Indian context."
+	
+	4. **ACTIONABLE RECOMMENDATIONS:**
+	   - Provide clear, step-by-step guidance
+	   - Explain WHY each recommendation fits their profile
+	   - Example: "Given your Aggressive risk profile and 10-year horizon, consider equity-heavy mutual funds like..."
+	   - Always justify recommendations with their specific data
+	
+	5. **RISK & COMPLIANCE:**
+	   - Frame as suggestions, not final advice
+	   - Encourage consultation with certified advisors for execution
+	   - Be transparent about reasoning (explainable AI)
+	
+	6. **DATA GATHERING:**
+	   - If critical information is missing (risk tolerance, income, time horizon), ASK before advising
+	   - Ask 1-5 specific questions to complete the picture
+	   - Example: "To recommend the best investment, I need to know: What's your monthly income? What's your risk tolerance?"
+	
+	7. **RESPONSE STYLE:**
+	   - Professional, warm, and reassuring tone
+	   - Use emojis sparingly for visual breaks (💰 🎯 📊)
+	   - Break down complex concepts simply
+	   - Give specific examples and numbers
+	
+	CURRENT USER MESSAGE: "${currentMessage}"
+	
+	Analyze their financial profile above and provide personalized advice. If they're asking about investments, reference their risk profile. If asking about savings, mention their current savings rate. If asking about goals, refer to their active goals.`;
+	
+	return {
+	  json: {
+	    sessionId: sessionId,
+	    chatInput: fullPrompt,
+	    originalMessage: currentMessage,
+	    financialData: financialData,
+	    profileSummary: financialProfile
+	  }
+};
 
 AI Agent node:
 	Source for Prompt: Define below

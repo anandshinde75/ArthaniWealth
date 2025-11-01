@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { MessageCircle, X } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { MessageCircle, X, RotateCcw } from "lucide-react";
 import { storage, getSessionId } from "../utils/storage";
 import ReactMarkdown from "react-markdown";
 
@@ -8,6 +8,7 @@ export default function ChatWidget() {
   const [isMaximized, setIsMaximized] = useState(false);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [chatInput, setChatInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load chat history on mount
   useEffect(() => {
@@ -19,6 +20,45 @@ export default function ChatWidget() {
   useEffect(() => {
     storage.session.set("chatHistory", chatMessages);
   }, [chatMessages]);
+
+  // Auto-scroll to bottom when messages change or chat opens
+  useEffect(() => {
+    if (chatOpen && messagesEndRef.current) {
+      // Use setTimeout to ensure DOM is fully rendered
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [chatMessages, chatOpen]);
+
+  const resetConversation = () => {
+    if (window.confirm("Are you sure you want to reset the conversation? This will clear all chat history.")) {
+      setChatMessages([]);
+      storage.session.set("chatHistory", []);
+      
+      // Show initial greeting after reset
+      const risk = storage.get("riskProfile");
+      const goals = storage.get("financialGoals", []);
+
+      let greeting =
+        "👋 Hi there! I'm your ArthaniWealth assistant. How can I help you today?";
+
+      if (risk || goals.length > 0) {
+        greeting = "👋 Welcome back! ";
+        if (risk) {
+          greeting += `I see your risk profile is ${risk}. `;
+        }
+        if (goals.length > 0) {
+          greeting += `You're tracking ${goals.length} financial goal${goals.length > 1 ? "s" : ""}. `;
+        }
+        greeting += "How can I assist you with your financial planning?";
+      }
+
+      setChatMessages([
+        { type: "bot", text: greeting, time: new Date().toLocaleTimeString() },
+      ]);
+    }
+  };
 
   const openChat = () => {
     setChatOpen(true);
@@ -307,6 +347,15 @@ export default function ChatWidget() {
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Reset Conversation Button */}
+              <button
+                onClick={resetConversation}
+                className="text-white hover:bg-white/20 rounded-full p-1"
+                title="Reset conversation"
+              >
+                <RotateCcw size={18} />
+              </button>
+
               {/* Maximize / Minimize Button */}
               <button
                 onClick={() => setIsMaximized(!isMaximized)}
@@ -384,6 +433,8 @@ export default function ChatWidget() {
                 </div>
               </div>
             ))}
+            {/* Invisible element for auto-scroll */}
+            <div ref={messagesEndRef} />
           </div>
 
           <div className="p-4 border-t">
