@@ -94,7 +94,7 @@ export default function ContactPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-emerald-500"
-                    placeholder="John Doe"
+                    placeholder="Sanjay Sharma"
                     disabled={isSubmitting}
                   />
                 </div>
@@ -109,7 +109,7 @@ export default function ContactPage() {
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-emerald-500"
-                    placeholder="john@example.com"
+                    placeholder="sanjay@example.com"
                     disabled={isSubmitting}
                   />
                 </div>
@@ -141,7 +141,7 @@ export default function ContactPage() {
                     value={formData.message}
                     onChange={(e) => setFormData({...formData, message: e.target.value})}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-emerald-500"
-                    placeholder="How can we help you?"
+                    placeholder="Can you help me with my Personal Finance"
                     disabled={isSubmitting}
                   ></textarea>
                 </div>
